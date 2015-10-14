@@ -1,0 +1,56 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.1.42</VERSION>
+ <DEVICE>ATmega2560</DEVICE>
+ <WORKING_DIR>C:\users\erickchaosz\My Documents</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes</DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\users\erickchaosz\My Documents\lab4C.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:\Program Files\Atmel\AVR Tools\AvrAssembler2\Appnotes\m2560def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\users\erickchaosz\My Documents\lab42.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>C:\users\erickchaosz\My Documents\lab42.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>C:\users\erickchaosz\My Documents\lab42.map</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <RESET><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>51</LINE></RESET>
+  <Timer0OVF><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>306</LINE></Timer0OVF>
+  <TempCounter><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>419</LINE></TempCounter>
+  <SecondCounter><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>417</LINE></SecondCounter>
+  <lcd_command><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>225</LINE></lcd_command>
+  <lcd_wait><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>245</LINE></lcd_wait>
+  <sleep_5ms><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>281</LINE></sleep_5ms>
+  <sleep_1ms><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>269</LINE></sleep_1ms>
+  <lcd_data><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>234</LINE></lcd_data>
+  <main><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>100</LINE></main>
+  <colloop><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>103</LINE></colloop>
+  <delay><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>109</LINE></delay>
+  <nextcol><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>129</LINE></nextcol>
+  <rowloop><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>120</LINE></rowloop>
+  <convert><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>134</LINE></convert>
+  <letters><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>184</LINE></letters>
+  <symbols><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>189</LINE></symbols>
+  <convert_end><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>201</LINE></convert_end>
+  <star><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>161</LINE></star>
+  <displaynum><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>353</LINE></displaynum>
+  <zero><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>198</LINE></zero>
+  <halt><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>206</LINE></halt>
+  <lcd_wait_loop><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>251</LINE></lcd_wait_loop>
+  <delayloop_1ms><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>274</LINE></delayloop_1ms>
+  <sleep_100ms><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>290</LINE></sleep_100ms>
+  <delayloop_100ms><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>293</LINE></delayloop_100ms>
+  <end_sleep_100ms><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>300</LINE></end_sleep_100ms>
+  <EndIF><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>340</LINE></EndIF>
+  <NotSecond><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>336</LINE></NotSecond>
+  <DIV10><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>388</LINE></DIV10>
+  <displaynumend><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>378</LINE></displaynumend>
+  <divloop><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>400</LINE></divloop>
+  <enddiv><FILE>C:\users\erickchaosz\My Documents\lab4C.asm</FILE><LINE>405</LINE></enddiv>
+ </LABELS>
+</ASSEMBLER_INFO>
