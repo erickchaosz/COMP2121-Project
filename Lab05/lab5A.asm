@@ -2,11 +2,12 @@
 
 .def input_increment = r20;
 .def num_div = r23
-.def sec_counter = r17;
 .def temp = r18;
 .def stack_count = r19;
 .def remainder = r17
 .def div_result = r18
+.def debounce = r31
+
 
 .equ LCD_RS = 7
 .equ LCD_E = 6
@@ -45,10 +46,15 @@
 
 
 RESET:
-	clr sec_counter;
 	clr input_increment;
 	clr temp;
-
+	ldi temp, 0b00000000
+	out TCCR0A, temp
+	ldi temp, 0b00000010
+	out TCCR0B, temp
+	ldi temp, 1<<TOIE0
+	sts TIMSK0, temp
+	clr temp
 	ldi temp,(2 << ISC10)
 	sts EICRA, temp
 
@@ -81,6 +87,8 @@ RESET:
 	do_lcd_command 0b00000110 ; increment, no display shift
 	do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
+	ser temp
+	out DDRC, temp
 	clr temp
 	jmp main
 
@@ -92,10 +100,10 @@ call_lcd:
 	clr stack_count
 	mov num_div, input_increment
 	rcall CALC_DIV
-	rcall sleep_250ms
-	do_lcd_command 0b00000001 ; clear display
-	do_lcd_command 0b00000110 ; increment, no display shift
-	do_lcd_command 0b00001110 ; Cursor on, bar, no blink
+	;rcall sleep_250ms
+	;do_lcd_command 0b00000001 ; clear display
+	;do_lcd_command 0b00000110 ; increment, no display shift
+	;do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 	clr input_increment
 	rjmp main
 
@@ -183,10 +191,23 @@ end_sleep_250ms:
 	ret
 
 EXT_INT2:	;called 4 times a rotation on the motor
-	inc input_increment;
+	cpi debounce, 0
+	breq isDebounced2
 	reti
 
+	isDebounced2:
+		ldi debounce, 1
+		push temp
+		in temp, SREG
+		push temp
+		inc input_increment
+		pop temp
+		out SREG, temp
+		pop temp
+		reti
+
 CALC_DIV: 	;called by main loop
+	out PORTC, input_increment
 	rcall DIV10
 	mov num_div, r21
 
@@ -200,7 +221,7 @@ CALC_DIV: 	;called by main loop
 	rjmp CALC_DIV
 
 SHOW_LCD:
-	pop num_div ;r22
+	pop num_div
 	dec stack_count
 
 	cpi stack_count, 0
@@ -212,7 +233,6 @@ SHOW_LCD:
 
 END_LCD:
 	clr num_div
-	clr sec_counter
 	;pop stack_count
 	clr stack_count
 	clr temp
@@ -252,3 +272,28 @@ enddiv:
   pop r31
   pop r30
   ret
+
+; debounce 1 ms
+Timer0OVF:
+  push temp
+  in temp, SREG
+  push temp
+  push YH
+  push YL
+  push r25
+  push r24
+	cpi debounce, 1
+	brne EndIF
+	rcall sleep_1ms
+	clr debounce
+
+EndIF:
+
+  pop r24
+  pop r25
+  pop YL
+  pop YH
+  pop temp
+  out SREG, temp
+  pop temp
+  reti
