@@ -136,7 +136,7 @@ convert:
   breq main
   ldi debounce, 1
 
-  subi temp1, -'1'
+  ;subi temp1, -'1'
   	;inc acc
   	;out PORTC, acc	;<- this code not needed
 
@@ -147,7 +147,10 @@ convert:
   cpi QueueCtr, 200
   breq FULLQueue
   
-  st y+, temp1
+  
+  st z+, temp1
+
+  
   inc QueueCtr
 
 convert_jump:
