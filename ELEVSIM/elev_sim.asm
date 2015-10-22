@@ -195,8 +195,8 @@ convert:
 
   push r16
   st z+, temp1
-  subi temp1, -'1'
-  do_lcd_data temp1
+  ;subi temp1, -'1'
+  ;do_lcd_data temp1
   pop r16
   inc QueueCtr
 
@@ -227,7 +227,14 @@ symbols:
   jmp convert_end
 
 star:
-  ldi temp1, '*'
+  ;ldi temp1, '*'
+  cpi debounce, 1
+  breq main
+  ldi debounce, 1
+  ld temp1, x+
+  subi temp1, -'1'
+
+  do_lcd_data temp1
   jmp convert_end
 
 zero:
