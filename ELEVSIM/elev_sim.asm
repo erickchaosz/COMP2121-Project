@@ -8,7 +8,7 @@ SecondCounter:
 .byte 2
 TempCounter:
 .byte 2
-
+	;Max: .db 200	;used for max size
 ;==================================
 ; macros
 ;==================================
@@ -27,6 +27,7 @@ TempCounter:
 ;==========
 
 .cseg
+Max: .db 200	;used for max size ;but generates warning
 rjmp RESET
 
 .org OVF0addr
@@ -41,6 +42,9 @@ rjmp RESET
 .def acc = r22
 .def debounce = r23
 
+;following register used in checking size of queue
+.def QueueCtr = r24
+;
 .equ PORTADIR = 0xF0      ; PD7-4: output, PD3-0, input
 .equ INITCOLMASK = 0xEF   ; scan from the rightmost column,
 .equ INITROWMASK = 0x01   ; scan from the top row
@@ -52,9 +56,20 @@ RESET:
   ldi temp1, high(RAMEND)
   out SPH, temp1
 
+  ldi xl, low(CMDQueue)
+  ldi xh, high(CMDQueue)
+
+  ldi zl, low(CMDQueue)
+  ldi zh, high(CMDQueue)
+
+
+
   sei                     ; initialize timer 0
   clear TempCounter
   clear SecondCounter
+  ;
+  ldi QueueCtr, 0
+  ;
   ldi temp1, 0b00000000
   out TCCR0A, temp1
   ldi temp1, 0b00000010
@@ -122,9 +137,31 @@ convert:
   ldi debounce, 1
 
   subi temp1, -'1'
-  inc acc
-  out PORTC, acc
+  	;inc acc
+  	;out PORTC, acc	;<- this code not needed
+
+;code to add value in temp1 to queue;
+;first, borrow register for compare
+
+  push temp1
+  cpi temp1, 200
+  breq FULLQueue
+  pop temp1
+  st y+, temp1
+  inc QueueCtr
+
+convert_jump:
+
   jmp convert_end
+
+;FULLQUEUE placeholder code;
+
+ FULLQueue:
+
+  	jmp convert_jump
+
+;---------------------;
+
 
 letters:
   ldi temp1, 'A'
@@ -196,3 +233,5 @@ EndIF:
   out SREG, temp1
   pop temp1
   reti
+
+  
