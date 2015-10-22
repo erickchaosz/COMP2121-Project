@@ -9,9 +9,13 @@ SecondCounter:
 TempCounter:
 .byte 2
 IsMoving:   ;boolean to check if lift is moving
-.byte 1
-IsStopped:  ;boolean to check if lift has arrived and stopped
-.byte 1
+.byte 2
+IsStopped:  ;boolean check if lift has arrived and stopped
+.byte 2
+IsOpened:
+.byte 2
+TempCounter4:
+.byte 2
 TempCounter5:
 .byte 2
 CurrFloor:
@@ -61,8 +65,12 @@ TargetFloor:
 
 rjmp RESET
 
+.org INT0addr
+	jmp EXT_INT0
 .org OVF0addr
   jmp Timer0OVF
+.org OVF4addr
+  jmp Timer4OVF
 .org OVF5addr
   jmp Timer5OVF
 
@@ -96,10 +104,21 @@ RESET:
   ldi zl, low(CMDQueue)
   ldi zh, high(CMDQueue)
 
+  ; Init lift states variables
   clear TargetFloor
   clear CurrFloor
+  clear IsMoving
+  clear IsStopped
+  clear IsOpened
 
   sei
+
+  ; Init push button interrupt
+  ldi temp1, (2 << ISC00)
+  sts EICRA, temp1
+  in temp1, EIMSK
+  ori temp1, (1<<INT0)
+  out EIMSK, temp1
 
   ;Init Timer 0
   clear TempCounter
@@ -113,13 +132,21 @@ RESET:
 
   ;Init Timer 5
   clear TempCounter5
-  clear IsMoving
   ldi temp1, 0b00000000
   sts TCCR5A, temp1
   ldi temp1, 0b00000100
   sts TCCR5B, temp1
   ldi temp1, 1<<TOIE5
   sts TIMSK5, temp1
+
+  ;Init Timer 4
+  clear TempCounter4
+  ldi temp1, 0b00000000
+  sts TCCR4A, temp1
+  ldi temp1, 0b00000100
+  sts TCCR4B, temp1
+  ldi temp1, 1<<TOIE4
+  sts TIMSK4, temp1
 
   ldi temp1, PORTADIR     ; PA7:4/PA3:0, out/in
   sts DDRL, temp1
@@ -147,9 +174,12 @@ RESET:
   do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
 main:
+  lds temp1, IsStopped
+  cpi temp1, 1
+  breq keypad
   lds temp1, IsMoving
-  cpi temp1, 0
-  brne keypad
+  cpi temp1, 1
+  breq keypad
   rcall GetNextFloor
 
 keypad:
@@ -219,20 +249,10 @@ letters:
   jmp convert_end
 
 symbols:
-  cpi col, 0
-  breq star
   cpi col, 1
   breq zero
   ldi temp1, '#'
   jmp convert_end
-
-star:
-  ;ldi temp1, '*'
-  cpi debounce, 1
-  breq main
-  ldi debounce, 1
-  jmp convert_end
-
 
 convert_end:
   jmp main
@@ -254,6 +274,22 @@ GetNextFloor:
 
 EndGetNextFloor:
   ret
+
+
+
+EXT_INT0:
+	push temp1
+	in temp1, SREG
+	push temp1
+  ldi temp1, 4
+	sts TempCounter4, temp1
+
+END0:
+	pop temp1
+  out SREG, temp1
+	pop temp1
+ 	reti
+
 
 
 ;; Timer for handling debouncing
@@ -301,6 +337,72 @@ EndIF:
   pop temp1
   reti
 
+;; Timer for simulating lift opening, waiting and closing
+Timer4OVF:
+  push temp1
+  in temp1, SREG
+  push temp1
+  push temp2
+  push YH
+  push YL
+  push r25
+  push r24
+  lds temp1, IsStopped
+  cpi temp1, 1
+  brne EndIF4
+
+  lds r24, TempCounter4
+  lds r25, TempCounter4+1
+  adiw r25:r24, 1         ; Increase the temporary counter by one.
+
+CheckLiftOpen:
+  cpi r24, low(1)
+  ldi temp1, high(1)
+  cpc r25, temp1
+  breq LiftOpened
+
+CheckLiftClose:
+  lds temp1, IsOpened
+  cpi temp1, 1
+  brne NotClosed
+  cpi r24, low(5)
+  ldi temp1, high(5)
+  cpc r25, temp1
+  breq LiftClosed
+  rjmp NotClosed
+
+LiftOpened:
+  ldi temp1, 1
+  sts IsOpened, temp1
+  ldi temp1, 'O'
+  do_lcd_data temp1
+  rjmp NotClosed
+
+LiftClosed:
+  clear TempCounter4
+  ldi temp1, 'C'
+  do_lcd_data temp1
+  clr temp1
+  sts IsOpened, temp1
+  sts IsStopped, temp1
+  rjmp EndIF4
+
+NotClosed:
+  sts TempCounter4, r24
+  sts TempCounter4+1, r25
+
+EndIF4:
+  pop r24
+  pop r25
+  pop YL
+  pop YH
+  pop temp2
+  pop temp1
+  out SREG, temp1
+  pop temp1
+  reti
+
+
 
 
 ;; Timer for simulating lift moving up
@@ -313,6 +415,11 @@ Timer5OVF:
   push YL
   push r25
   push r24
+
+  lds temp1, IsStopped
+  cpi temp1, 1
+  breq EndIF5
+
   lds temp1, IsMoving
   cpi temp1, 1            ; check if lift is moving
   brne EndIF5
@@ -347,6 +454,8 @@ MoveUp:
 IsArrive:
   clr temp2
   sts IsMoving, temp2
+  ldi temp2, 1
+  sts IsStopped, temp2
   rjmp BeforeEnd
 
 ShowCurrFloor:
