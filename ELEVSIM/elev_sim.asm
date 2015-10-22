@@ -27,7 +27,7 @@ TempCounter:
 ;==========
 
 .cseg
-Max: .db 200	;used for max size ;but generates warning
+
 rjmp RESET
 
 .org OVF0addr
@@ -143,10 +143,10 @@ convert:
 ;code to add value in temp1 to queue;
 ;first, borrow register for compare
 
-  push temp1
-  cpi temp1, 200
+  
+  cpi QueueCtr, 200
   breq FULLQueue
-  pop temp1
+  
   st y+, temp1
   inc QueueCtr
 
