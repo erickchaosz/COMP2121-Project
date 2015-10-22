@@ -8,7 +8,9 @@ SecondCounter:
 .byte 2
 TempCounter:
 .byte 2
-IsMoving: ;boolean to check if lift is moving
+IsMoving:   ;boolean to check if lift is moving
+.byte 1
+IsStopped:  ;boolean to check if lift has arrived and stopped
 .byte 1
 TempCounter5:
 .byte 2
@@ -145,6 +147,12 @@ RESET:
   do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
 main:
+  lds temp1, IsMoving
+  cpi temp1, 0
+  brne keypad
+  rcall GetNextFloor
+
+keypad:
   ldi cmask, INITCOLMASK  ; initial column mask
   clr col                 ; initial column
 
@@ -223,13 +231,6 @@ star:
   cpi debounce, 1
   breq main
   ldi debounce, 1
-
-  ; Take target floor from queue and move the lift
-  ld temp1, x+
-  sts TargetFloor, temp1
-  ldi temp1, 1
-  sts IsMoving, temp1
-
   jmp convert_end
 
 
@@ -238,6 +239,22 @@ convert_end:
 
 halt:
   rjmp halt
+
+; Take target floor from queue and move the lift
+GetNextFloor:
+  ;check if queue is empty
+  cp xl, zl
+  cpc xh, zh
+  breq EndGetNextFloor
+
+  ld temp1, x+
+  sts TargetFloor, temp1
+  ldi temp1, 1
+  sts IsMoving, temp1
+
+EndGetNextFloor:
+  ret
+
 
 ;; Timer for handling debouncing
 Timer0OVF:
