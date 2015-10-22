@@ -22,21 +22,30 @@
   <CmdQueue><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>5</LINE></CmdQueue>
   <SecondCounter><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>7</LINE></SecondCounter>
   <TempCounter><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>9</LINE></TempCounter>
-  <RESET><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>49</LINE></RESET>
-  <Timer0OVF><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>156</LINE></Timer0OVF>
-  <main><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>72</LINE></main>
-  <colloop><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>76</LINE></colloop>
-  <delay><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>84</LINE></delay>
-  <nextcol><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>104</LINE></nextcol>
-  <rowloop><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>95</LINE></rowloop>
-  <convert><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>109</LINE></convert>
-  <letters><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>129</LINE></letters>
-  <symbols><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>134</LINE></symbols>
-  <convert_end><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>149</LINE></convert_end>
-  <star><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>142</LINE></star>
-  <zero><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>146</LINE></zero>
-  <halt><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>152</LINE></halt>
-  <EndIF><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>190</LINE></EndIF>
-  <NotSecond><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>186</LINE></NotSecond>
+  <RESET><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>78</LINE></RESET>
+  <Timer0OVF><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>244</LINE></Timer0OVF>
+  <lcd_command><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>293</LINE></lcd_command>
+  <lcd_wait><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>313</LINE></lcd_wait>
+  <sleep_5ms><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>349</LINE></sleep_5ms>
+  <sleep_1ms><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>337</LINE></sleep_1ms>
+  <lcd_data><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>302</LINE></lcd_data>
+  <main><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>134</LINE></main>
+  <colloop><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>138</LINE></colloop>
+  <delay><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>146</LINE></delay>
+  <nextcol><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>166</LINE></nextcol>
+  <rowloop><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>157</LINE></rowloop>
+  <convert><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>171</LINE></convert>
+  <letters><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>217</LINE></letters>
+  <symbols><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>222</LINE></symbols>
+  <FULLQueue><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>210</LINE></FULLQueue>
+  <convert_jump><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>204</LINE></convert_jump>
+  <convert_end><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>237</LINE></convert_end>
+  <star><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>230</LINE></star>
+  <zero><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>234</LINE></zero>
+  <halt><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>240</LINE></halt>
+  <EndIF><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>278</LINE></EndIF>
+  <NotSecond><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>274</LINE></NotSecond>
+  <lcd_wait_loop><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>319</LINE></lcd_wait_loop>
+  <delayloop_1ms><FILE>C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm</FILE><LINE>342</LINE></delayloop_1ms>
  </LABELS>
 </ASSEMBLER_INFO>

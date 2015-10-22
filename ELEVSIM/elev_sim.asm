@@ -18,6 +18,7 @@ TempCounter:
         rcall lcd_command
         rcall lcd_wait
 .endmacro
+
 .macro do_lcd_data
         mov r16, @0
         rcall lcd_data
@@ -128,9 +129,7 @@ RESET:
   do_lcd_command 0b00000110 ; increment, no display shift
   do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
-  do_lcd_command 0b11000000
-  do_lcd_data r16
-	
+
 main:
   ldi cmask, INITCOLMASK  ; initial column mask
   clr col                 ; initial column
@@ -190,12 +189,13 @@ convert:
 ;code to add value in temp1 to queue;
 ;first, borrow register for compare
 
-  
+
   cpi QueueCtr, 200
   breq FULLQueue
-  
+
   push r16
   st z+, temp1
+  subi temp1, -'1'
   do_lcd_data temp1
   pop r16
   inc QueueCtr
@@ -352,4 +352,3 @@ sleep_5ms:
         rcall sleep_1ms
         rcall sleep_1ms
         ret
-  

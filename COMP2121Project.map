@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.42  C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm Wed Oct 21 10:07:35 2015
+AVRASM ver. 2.1.42  C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm Thu Oct 22 16:19:42 2015
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1362,8 +1362,12 @@ EQU  INT_VECTORS_SIZE 00000072
 DSEG CmdQueue     00000200
 DSEG SecondCounter 000002c8
 DSEG TempCounter  000002ca
+EQU  LCD_RS       00000007
+EQU  LCD_E        00000006
+EQU  LCD_RW       00000005
+EQU  LCD_BE       00000004
 CSEG RESET        00000030
-CSEG Timer0OVF    0000008c
+CSEG Timer0OVF    000000bd
 DEF  row          r16
 DEF  col          r17
 DEF  rmask        r18
@@ -1372,21 +1376,33 @@ DEF  temp1        r20
 DEF  temp2        r21
 DEF  acc          r22
 DEF  debounce     r23
+DEF  QueueCtr     r24
 EQU  PORTADIR     000000f0
 EQU  INITCOLMASK  000000ef
 EQU  INITROWMASK  00000001
 EQU  ROWMASK      0000000f
-CSEG main         0000004d
-CSEG colloop      0000004f
-CSEG delay        00000054
-CSEG nextcol      00000066
-CSEG rowloop      0000005d
-CSEG convert      0000006a
-CSEG letters      0000007a
-CSEG symbols      0000007e
-CSEG convert_end  00000089
-CSEG star         00000085
-CSEG zero         00000088
-CSEG halt         0000008b
-CSEG EndIF        000000b2
-CSEG NotSecond    000000ae
+CSEG lcd_command  000000eb
+CSEG lcd_wait     000000fb
+CSEG sleep_5ms    00000115
+CSEG sleep_1ms    0000010c
+CSEG lcd_data     000000f2
+CSEG main         00000075
+CSEG colloop      00000077
+CSEG delay        0000007c
+CSEG nextcol      0000008e
+CSEG rowloop      00000085
+CSEG convert      00000092
+CSEG letters      000000ab
+CSEG symbols      000000af
+CSEG FULLQueue    000000a9
+CSEG convert_jump 000000a7
+CSEG convert_end  000000ba
+CSEG star         000000b6
+CSEG zero         000000b9
+CSEG halt         000000bc
+CSEG EndIF        000000e3
+CSEG NotSecond    000000df
+CSEG lcd_wait_loop 00000100
+EQU  F_CPU        00f42400
+EQU  DELAY_1MS    00000f9c
+CSEG delayloop_1ms 00000110
