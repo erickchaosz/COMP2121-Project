@@ -3,12 +3,21 @@
 .dseg
 .org 0x200
 CmdQueue: ;queue for storing user's commands
-.byte 200
+.byte 500
 SecondCounter:
 .byte 2
 TempCounter:
 .byte 2
-	;Max: .db 200	;used for max size
+IsMoving: ;boolean to check if lift is moving
+.byte 1
+TempCounter5:
+.byte 2
+CurrFloor:
+.byte 2
+TargetFloor:
+.byte 2
+
+
 ;==================================
 ; macros
 ;==================================
@@ -34,11 +43,6 @@ TempCounter:
   st Y, temp1
 .endmacro
 
-.equ LCD_RS = 7
-.equ LCD_E = 6
-.equ LCD_RW = 5
-.equ LCD_BE = 4
-
 .macro lcd_set
         sbi PORTA, @0
 .endmacro
@@ -57,6 +61,9 @@ rjmp RESET
 
 .org OVF0addr
   jmp Timer0OVF
+.org OVF5addr
+  jmp Timer5OVF
+
 
 .def row = r16            ; current row number
 .def col = r17            ; current column number
@@ -64,16 +71,16 @@ rjmp RESET
 .def cmask = r19          ; mask for current column during scan
 .def temp1 = r20
 .def temp2 = r21
-.def acc = r22
-.def debounce = r23
+.def debounce = r22
 
-;following register used in checking size of queue
-.def QueueCtr = r24
-;
 .equ PORTADIR = 0xF0      ; PD7-4: output, PD3-0, input
 .equ INITCOLMASK = 0xEF   ; scan from the rightmost column,
 .equ INITROWMASK = 0x01   ; scan from the top row
 .equ ROWMASK = 0x0F       ; for obtaining input from Port D
+.equ LCD_RS = 7
+.equ LCD_E = 6
+.equ LCD_RW = 5
+.equ LCD_BE = 4
 
 RESET:
   ldi temp1, low(RAMEND)  ; initialize the stack
@@ -87,31 +94,39 @@ RESET:
   ldi zl, low(CMDQueue)
   ldi zh, high(CMDQueue)
 
+  clear TargetFloor
+  clear CurrFloor
 
+  sei
 
-  sei                     ; initialize timer 0
+  ;Init Timer 0
   clear TempCounter
   clear SecondCounter
-  ;
-  ldi QueueCtr, 0
-
-  ;KEYPAD init.
   ldi temp1, 0b00000000
   out TCCR0A, temp1
-  ldi temp1, 0b00000010
+  ldi temp1, 0b00000100
   out TCCR0B, temp1
   ldi temp1, 1<<TOIE0
   sts TIMSK0, temp1
+
+  ;Init Timer 5
+  clear TempCounter5
+  clear IsMoving
+  ldi temp1, 0b00000000
+  sts TCCR5A, temp1
+  ldi temp1, 0b00000100
+  sts TCCR5B, temp1
+  ldi temp1, 1<<TOIE5
+  sts TIMSK5, temp1
 
   ldi temp1, PORTADIR     ; PA7:4/PA3:0, out/in
   sts DDRL, temp1
   ser temp1               ; PORTC is output
   out DDRC, temp1
   out PORTC, temp1
-  clr acc
-  ser r16
 
   ;LCD init.
+  ser r16
   out DDRF, r16
   out DDRA, r16
   clr r16
@@ -128,7 +143,6 @@ RESET:
   do_lcd_command 0b00000001 ; clear display
   do_lcd_command 0b00000110 ; increment, no display shift
   do_lcd_command 0b00001110 ; Cursor on, bar, no blink
-
 
 main:
   ldi cmask, INITCOLMASK  ; initial column mask
@@ -177,41 +191,19 @@ convert:
   lsl temp1
   add temp1, row
   add temp1, col
+  inc temp1
 
+numbers:
   cpi debounce, 1
   breq main
   ldi debounce, 1
 
-  ;subi temp1, -'1'
-  	;inc acc
-  	;out PORTC, acc	;<- this code not needed
-
-;code to add value in temp1 to queue;
-;first, borrow register for compare
-
-
-  cpi QueueCtr, 200
-  breq FULLQueue
-
-  push r16
-  st z+, temp1
-  ;subi temp1, -'1'
-  ;do_lcd_data temp1
-  pop r16
-  inc QueueCtr
-
-convert_jump:
-
+  st z+, temp1        ;add to queue
   jmp convert_end
 
-;FULLQUEUE placeholder code;
-
- FULLQueue:
-
-  	jmp convert_jump
-
-;---------------------;
-
+zero:
+  clr temp1
+  rjmp numbers
 
 letters:
   ldi temp1, 'A'
@@ -231,14 +223,15 @@ star:
   cpi debounce, 1
   breq main
   ldi debounce, 1
-  ld temp1, x+
-  subi temp1, -'1'
 
-  do_lcd_data temp1
+  ; Take target floor from queue and move the lift
+  ld temp1, x+
+  sts TargetFloor, temp1
+  ldi temp1, 1
+  sts IsMoving, temp1
+
   jmp convert_end
 
-zero:
-  ldi temp1, '0'
 
 convert_end:
   jmp main
@@ -261,8 +254,8 @@ Timer0OVF:
   lds r24, TempCounter
   lds r25, TempCounter+1
   adiw r25:r24, 1         ; Increase the temporary counter by one.
-  cpi r24, low(1000)
-  ldi temp1, high(1000)
+  cpi r24, low(30)
+  ldi temp1, high(30)
   cpc r25, temp1
   brne NotSecond
 
@@ -292,70 +285,144 @@ EndIF:
   reti
 
 
-        ;;
-        ;;  Send a command to the LCD (r16)
-        ;;
+
+;; Timer for simulating lift moving up
+Timer5OVF:
+  push temp1
+  in temp1, SREG
+  push temp1
+  push temp2
+  push YH
+  push YL
+  push r25
+  push r24
+  lds temp1, IsMoving
+  cpi temp1, 1            ; check if lift is moving
+  brne EndIF5
+
+  lds r24, TempCounter5
+  lds r25, TempCounter5+1
+  adiw r25:r24, 1         ; Increase the temporary counter by one.
+  cpi r24, low(2)
+  ldi temp1, high(2)
+  cpc r25, temp1
+  brne NotTwoSecond5
+
+  lds temp1, CurrFloor
+  lds temp2, TargetFloor
+
+  cp temp1, temp2
+  brlo MoveUp
+
+  cp temp1, temp2
+  breq IsArrive
+
+MoveDown:
+  dec temp1
+  sts CurrFloor, temp1
+  rjmp ShowCurrFloor
+
+MoveUp:
+  inc temp1
+  sts CurrFloor, temp1
+  rjmp ShowCurrFloor
+
+IsArrive:
+  clr temp2
+  sts IsMoving, temp2
+  rjmp BeforeEnd
+
+ShowCurrFloor:
+  subi temp1, -'0'
+  do_lcd_command 0b00000001 ; clear display
+  do_lcd_command 0b00000110 ; increment, no display shift
+  do_lcd_command 0b00001110 ; Cursor on, bar, no blink
+  do_lcd_data temp1
+
+BeforeEnd:
+  clear TempCounter5
+  rjmp EndIF5
+
+NotTwoSecond5:
+  sts TempCounter5, r24
+  sts TempCounter5+1, r25
+
+EndIF5:
+  pop r24
+  pop r25
+  pop YL
+  pop YH
+  pop temp2
+  pop temp1
+  out SREG, temp1
+  pop temp1
+  reti
+
+
+  ;;
+  ;;  Send a command to the LCD (r16)
+  ;;
 
 lcd_command:
-        out PORTF, r16
-        rcall sleep_1ms
-        lcd_set LCD_E
-        rcall sleep_1ms
-        lcd_clr LCD_E
-        rcall sleep_1ms
-        ret
+  out PORTF, r16
+  rcall sleep_1ms
+  lcd_set LCD_E
+  rcall sleep_1ms
+  lcd_clr LCD_E
+  rcall sleep_1ms
+  ret
 
 lcd_data:
-        out PORTF, r16
-        lcd_set LCD_RS
-        rcall sleep_1ms
-        lcd_set LCD_E
-        rcall sleep_1ms
-        lcd_clr LCD_E
-        rcall sleep_1ms
-        lcd_clr LCD_RS
-        ret
+  out PORTF, r16
+  lcd_set LCD_RS
+  rcall sleep_1ms
+  lcd_set LCD_E
+  rcall sleep_1ms
+  lcd_clr LCD_E
+  rcall sleep_1ms
+  lcd_clr LCD_RS
+  ret
 
 lcd_wait:
-        push r16
-        clr r16
-        out DDRF, r16
-        out PORTF, r16
-        lcd_set LCD_RW
+  push r16
+  clr r16
+  out DDRF, r16
+  out PORTF, r16
+  lcd_set LCD_RW
 lcd_wait_loop:
-        rcall sleep_1ms
-        lcd_set LCD_E
-        rcall sleep_1ms
-        in r16, PINF
-        lcd_clr LCD_E
-        sbrc r16, 7
-        rjmp lcd_wait_loop
-        lcd_clr LCD_RW
-        ser r16
-        out DDRF, r16
-        pop r16
-        ret
+  rcall sleep_1ms
+  lcd_set LCD_E
+  rcall sleep_1ms
+  in r16, PINF
+  lcd_clr LCD_E
+  sbrc r16, 7
+  rjmp lcd_wait_loop
+  lcd_clr LCD_RW
+  ser r16
+  out DDRF, r16
+  pop r16
+  ret
 
 .equ F_CPU = 16000000
 .equ DELAY_1MS = F_CPU / 4 / 1000 - 4
         ;;  4 cycles per iteration - setup/call-return overhead
 
 sleep_1ms:
-        push r24
-        push r25
-        ldi r25, high(DELAY_1MS)
-        ldi r24, low(DELAY_1MS)
+  push r24
+  push r25
+  ldi r25, high(DELAY_1MS)
+  ldi r24, low(DELAY_1MS)
 delayloop_1ms:
-        sbiw r25:r24, 1
-        brne delayloop_1ms
-        pop r25
-        pop r24
-        ret
+  sbiw r25:r24, 1
+  brne delayloop_1ms
+  pop r25
+  pop r24
+  ret
 
 sleep_5ms:
-        rcall sleep_1ms
-        rcall sleep_1ms
-        rcall sleep_1ms
-        rcall sleep_1ms
-        rcall sleep_1ms
-        ret
+  rcall sleep_1ms
+  rcall sleep_1ms
+  rcall sleep_1ms
+  rcall sleep_1ms
+  rcall sleep_1ms
+  ret
