@@ -14,6 +14,10 @@ IsStopped:  ;boolean check if lift has arrived and stopped
 .byte 2
 IsOpened:
 .byte 2
+EmergencyClosed: ;boolean check if lift door closed in emergency
+.byte 2
+EmergencyMessageShown: ;boolean check if message is shown
+.byte 2
 TempCounter4:
 .byte 2
 TempCounter5:
@@ -69,6 +73,8 @@ rjmp RESET
 	jmp EXT_INT0
 .org OVF0addr
   jmp Timer0OVF
+.org OVF3addr
+	jmp Timer3OVF
 .org OVF4addr
   jmp Timer4OVF
 .org OVF5addr
@@ -82,6 +88,8 @@ rjmp RESET
 .def temp1 = r20
 .def temp2 = r21
 .def debounce = r22
+.def emergency = r23
+.def brightness = r24
 
 .equ PORTADIR = 0xF0      ; PD7-4: output, PD3-0, input
 .equ INITCOLMASK = 0xEF   ; scan from the rightmost column,
@@ -110,6 +118,7 @@ RESET:
   clear IsMoving
   clear IsStopped
   clear IsOpened
+  clear EmergencyClosed
 
   sei
 
@@ -129,6 +138,19 @@ RESET:
   out TCCR0B, temp1
   ldi temp1, 1<<TOIE0
   sts TIMSK0, temp1
+
+  ;Init Timer 3 and led
+  ldi brightness, 255
+  ldi temp1, 0b0010000
+  out DDRE, temp1
+  ldi temp1, (1 << CS30)
+  sts TCCR3B, temp1
+  ldi temp1, (1<< WGM30)|(1<<COM3B1)
+  sts TCCR3A, temp1
+  ldi temp1, 0b0000011
+	sts TCCR3B, temp1
+	ldi temp1, 1<<TOIE3		; turns overflow interrupt bit on
+	sts TIMSK3, temp1
 
   ;Init Timer 5
   clear TempCounter5
@@ -162,6 +184,8 @@ RESET:
   out PORTF, r16
   out PORTA, r16
 
+  clr emergency
+
   do_lcd_command 0b00111000 ; 2x5x7
   rcall sleep_5ms
   do_lcd_command 0b00111000 ; 2x5x7
@@ -173,10 +197,17 @@ RESET:
   do_lcd_command 0b00000110 ; increment, no display shift
   do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
+  ldi temp1, '0'
+  do_lcd_data temp1
+
 main:
+  cpi emergency, 1
+  breq keypad
   lds temp1, IsStopped
   cpi temp1, 1
-  breq keypad
+  breq checkMove
+
+checkMove:
   lds temp1, IsMoving
   cpi temp1, 1
   breq keypad
@@ -190,9 +221,7 @@ colloop:
   cpi col, 4
   breq main               ; If all keys are scanned, repeat.
   sts PORTL, cmask        ; Otherwise, scan a column.
-
   ldi temp1, 0xFF         ; Slow down the scan operation.
-
 
 delay:
   dec temp1
@@ -214,6 +243,7 @@ rowloop:
   inc row
   lsl rmask
   jmp rowloop
+
 nextcol:
   lsl cmask
   inc col
@@ -249,16 +279,75 @@ letters:
   jmp convert_end
 
 symbols:
+  cpi col, 0
+  breq star
   cpi col, 1
   breq zero
   ldi temp1, '#'
   jmp convert_end
+
+star:
+  ;ldi temp1, '*'
+  cpi debounce, 1
+  breq convert_end
+  ldi debounce, 1
+
+  cpi emergency, 0
+  breq start_emergency
+  rcall StopEmergency
+  jmp convert_end
+
+start_emergency:
+  ldi emergency, 1
+  rcall StartEmergency
+  jmp convert_end
+
 
 convert_end:
   jmp main
 
 halt:
   rjmp halt
+
+StopEmergency:
+  push temp1
+  clr emergency
+  clr brightness
+  sts EmergencyClosed, emergency
+  sts EmergencyMessageShown, emergency
+  sts OCR3BL, brightness
+  sts OCR3BH, brightness
+  do_lcd_command 0b00000001 ; clear display
+  do_lcd_command 0b00000110 ; increment, no display shift
+  do_lcd_command 0b00001110 ; Cursor on, bar, no blink
+  ldi temp1, '0'
+  do_lcd_data temp1
+
+EndStopEmergency:
+  pop temp1
+  ret
+
+StartEmergency:
+  push temp1
+
+  lds temp1, IsStopped
+  cpi temp1, 1
+  brne EmergencyMove
+  ;close lift door
+  ldi temp1, 4
+  sts TempCounter4, temp1
+  ldi temp1, 1
+  sts IsOpened, temp1
+
+EmergencyMove:
+  clr temp1
+  sts TargetFloor, temp1
+  ldi temp1, 1
+  sts IsMoving, temp1
+
+EndStartEmergency:
+  pop temp1
+  ret
 
 ; Take target floor from queue and move the lift
 GetNextFloor:
@@ -274,7 +363,6 @@ GetNextFloor:
 
 EndGetNextFloor:
   ret
-
 
 
 EXT_INT0:
@@ -337,6 +425,73 @@ EndIF:
   pop temp1
   reti
 
+SHOW_EMERGENCY_MSG:
+  push temp1
+  do_lcd_command 0b00000001 ; clear display
+  do_lcd_command 0b00000110 ; increment, no display shift
+  do_lcd_command 0b00001110 ; Cursor on, bar, no blink
+  ldi temp1, 'E'
+  do_lcd_data temp1
+  ldi temp1, 'm'
+  do_lcd_data temp1
+  ldi temp1, 'e'
+  do_lcd_data temp1
+  ldi temp1, 'r'
+  do_lcd_data temp1
+  ldi temp1, 'g'
+  do_lcd_data temp1
+  ldi temp1, 'e'
+  do_lcd_data temp1
+  ldi temp1, 'n'
+  do_lcd_data temp1
+  ldi temp1, 'c'
+  do_lcd_data temp1
+  ldi temp1, 'y'
+  do_lcd_data temp1
+  do_lcd_command 0b11000000 ; Second row
+  ldi temp1, 'C'
+  do_lcd_data temp1
+  ldi temp1, 'a'
+  do_lcd_data temp1
+  ldi temp1, 'l'
+  do_lcd_data temp1
+  ldi temp1, 'l'
+  do_lcd_data temp1
+  ldi temp1, ' '
+  do_lcd_data temp1
+  ldi temp1, '0'
+  do_lcd_data temp1
+  ldi temp1, '0'
+  do_lcd_data temp1
+  ldi temp1, '0'
+  do_lcd_data temp1
+  ldi temp1, 1
+  sts EmergencyMessageShown, temp1
+
+END_SHOW_EMERGENCY:
+  pop temp1
+  ret
+
+;; Timer for emergency lights
+TIMER3OVF:
+  push temp1
+  cpi emergency, 0
+  breq EndIF3
+  dec brightness
+  sts OCR3BL, brightness
+  sts OCR3BH, brightness
+  lds temp1, EmergencyClosed ; check if lift has reached ground floor and closed
+  cpi temp1, 0
+  breq EndIF3
+  lds temp1, EmergencyMessageShown ; makes sure message is rendered only once
+  cpi temp1, 1
+  breq EndIF3
+  rcall SHOW_EMERGENCY_MSG
+
+EndIF3:
+  pop temp1
+  reti
+
 ;; Timer for simulating lift opening, waiting and closing
 Timer4OVF:
   push temp1
@@ -385,6 +540,12 @@ LiftClosed:
   clr temp1
   sts IsOpened, temp1
   sts IsStopped, temp1
+
+  cpi emergency, 1
+  brne BeforeEnd4
+  ldi temp1, 1
+  sts EmergencyClosed, temp1
+BeforeEnd4:
   rjmp EndIF4
 
 NotClosed:
@@ -405,7 +566,7 @@ EndIF4:
 
 
 
-;; Timer for simulating lift moving up
+;; Timer for simulating lift moving
 Timer5OVF:
   push temp1
   in temp1, SREG
