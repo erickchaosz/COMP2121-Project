@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.42  C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm Fri Oct 23 17:11:37 2015
+AVRASM ver. 2.1.42  C:\users\erickchaosz\My Documents\ELEVSIM\elev_sim.asm Fri Oct 23 17:18:22 2015
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1376,7 +1376,7 @@ CSEG EXT_INT0     00000184
 CSEG Timer0OVF    0000018e
 CSEG Timer3OVF    00000212
 CSEG Timer4OVF    00000225
-CSEG Timer5OVF    0000026c
+CSEG Timer5OVF    00000270
 DEF  row          r16
 DEF  col          r17
 DEF  rmask        r18
@@ -1394,11 +1394,11 @@ EQU  LCD_RS       00000007
 EQU  LCD_E        00000006
 EQU  LCD_RW       00000005
 EQU  LCD_BE       00000004
-CSEG lcd_command  000002bc
-CSEG lcd_wait     000002cc
-CSEG sleep_5ms    000002e6
-CSEG sleep_1ms    000002dd
-CSEG lcd_data     000002c3
+CSEG lcd_command  000002c0
+CSEG lcd_wait     000002d0
+CSEG sleep_5ms    000002ea
+CSEG sleep_1ms    000002e1
+CSEG lcd_data     000002c7
 CSEG main         000000fa
 CSEG keypad       00000105
 CSEG checkMove    00000100
@@ -1428,21 +1428,21 @@ CSEG NotSecond    000001b0
 CSEG SHOW_EMERGENCY_MSG 000001bc
 CSEG END_SHOW_EMERGENCY 00000210
 CSEG EndIF3       00000223
-CSEG EndIF4       00000263
+CSEG EndIF4       00000267
 CSEG CheckLiftOpen 00000236
 CSEG LiftOpened   00000243
 CSEG CheckLiftClose 0000023a
-CSEG NotClosed    0000025f
+CSEG NotClosed    00000263
 CSEG LiftClosed   0000024b
-CSEG BeforeEnd4   0000025e
-CSEG EndIF5       000002b3
-CSEG NotTwoSecond5 000002af
-CSEG MoveUp       00000291
-CSEG IsArrive     00000295
-CSEG MoveDown     0000028d
-CSEG ShowCurrFloor 0000029c
-CSEG BeforeEnd    000002a9
-CSEG lcd_wait_loop 000002d1
+CSEG BeforeEnd4   00000262
+CSEG EndIF5       000002b7
+CSEG NotTwoSecond5 000002b3
+CSEG MoveUp       00000295
+CSEG IsArrive     00000299
+CSEG MoveDown     00000291
+CSEG ShowCurrFloor 000002a0
+CSEG BeforeEnd    000002ad
+CSEG lcd_wait_loop 000002d5
 EQU  F_CPU        00f42400
 EQU  DELAY_1MS    00000f9c
-CSEG delayloop_1ms 000002e1
+CSEG delayloop_1ms 000002e5

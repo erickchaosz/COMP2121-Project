@@ -543,6 +543,9 @@ LiftClosed:
 
   cpi emergency, 1
   brne BeforeEnd4
+  lds temp1, CurrFloor
+  cpi temp1, 0
+  brne BeforeEnd4
   ldi temp1, 1
   sts EmergencyClosed, temp1
 BeforeEnd4:
